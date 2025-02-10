@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fill the Missing Letters</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            margin: auto;
+            width: 500px;
+            padding: 20px;
+            border: 2px solid black;
+            background-color: lightblue;
+        }
+        .word-box {
+            font-size: 24px;
+            margin: 20px;
+        }
+        .option-button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 20px;
+            width: 150px;
+        }
+        .level-button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fill the Missing Letters</h1>
+    <div>
+        <button class="level-button" onclick="startGame('easy')">Easy</button>
+        <button class="level-button" onclick="startGame('medium')">Medium</button>
+        <button class="level-button" onclick="startGame('hard')">Hard</button>
+    </div>
+    <div id="game-container"></div>
+    <script>
+        const words = {
+            easy: ['cat', 'dog', 'bat', 'sun', 'pen', 'rat', 'hat', 'pig', 'cow', 'bug'],
+            medium: ['fish', 'tree', 'blue', 'jump', 'star', 'frog', 'cloud', 'grass', 'shirt', 'flame'],
+            hard: ['light', 'bread', 'crisp', 'storm', 'train', 'bright', 'shadow', 'planet', 'throne', 'market']
+        };
+        
+        let usedWords = new Set();
+        let currentLevel = '';
+        let currentWord = '';
+        let missingIndex = 0;
+        let questionCount = 0;
+        
+        function startGame(level) {
+            if (questionCount >= 30) {
+                usedWords.clear();
+                questionCount = 0;
+            }
+            
+            currentLevel = level;
+            let selectedWords = words[level].filter(word => !usedWords.has(word));
+            
+            if (selectedWords.length === 0) {
+                usedWords.clear();
+                selectedWords = words[level];
+            }
+            
+            currentWord = selectedWords[Math.floor(Math.random() * selectedWords.length)];
+            usedWords.add(currentWord);
+            questionCount++;
+            missingIndex = Math.floor(Math.random() * currentWord.length);
+            
+            let correctLetter = currentWord[missingIndex];
+            let options = generateOptions(correctLetter);
+            
+            let wordDisplay = currentWord.split('').map((letter, index) => {
+                return index === missingIndex ? '_' : letter;
+            }).join('');
+            
+            document.getElementById('game-container').innerHTML = `
+                <div class='word-box'>${wordDisplay}</div>
+                ${options.map(letter => `<button class='option-button' onclick='checkAnswer("${letter}")'>${letter}</button>`).join('')}
+            `;
+        }
+        
+        function generateOptions(correctLetter) {
+            let letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+            let options = new Set([correctLetter]);
+            while (options.size < 3) {
+                let randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                options.add(randomLetter);
+            }
+            return Array.from(options).sort(() => Math.random() - 0.5);
+        }
+        
+        function checkAnswer(selectedLetter) {
+            if (selectedLetter === currentWord[missingIndex]) {
+                document.getElementById('game-container').innerHTML = '<h2>Correct Answer!</h2>';
+            } else {
+                document.getElementById('game-container').innerHTML = '<h2>Wrong Answer!</h2>';
+            }
+            setTimeout(() => startGame(currentLevel), 2000);
+        }
+    </script>
+</body>
+</html>
